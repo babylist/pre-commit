@@ -15,7 +15,6 @@ from pre_commit.envcontext import UNSET
 from pre_commit.envcontext import Var
 from pre_commit.languages import helpers
 from pre_commit.prefix import Prefix
-from pre_commit.util import CalledProcessError
 from pre_commit.util import resource_bytesio
 
 ENVIRONMENT_DIR = 'rbenv'
@@ -91,7 +90,6 @@ def _install_rbenv(
     # Only install ruby-build if the version is specified
     if version != C.DEFAULT:
         plugins_dir = os.path.join(envdir, 'plugins')
-        _extract_resource('ruby-download.tar.gz', plugins_dir)
         _extract_resource('ruby-build.tar.gz', plugins_dir)
 
 
@@ -99,11 +97,8 @@ def _install_ruby(
         prefix: Prefix,
         version: str,
 ) -> None:  # pragma: win32 no cover
-    try:
-        helpers.run_setup_cmd(prefix, ('rbenv', 'download', version))
-    except CalledProcessError:  # pragma: no cover (usually find with download)
-        # Failed to download from mirror for some reason, build it instead
-        helpers.run_setup_cmd(prefix, ('rbenv', 'install', version))
+    # build from source using rbenv + ruby-build
+    helpers.run_setup_cmd(prefix, ('rbenv', 'install', version))
 
 
 def install_environment(
